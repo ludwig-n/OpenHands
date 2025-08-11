@@ -26,6 +26,7 @@ from openhands.memory.memory import Memory
 from openhands.microagent.microagent import BaseMicroagent
 from openhands.runtime import get_runtime_cls
 from openhands.runtime.base import Runtime
+from openhands.runtime.plugins.jupyter import JupyterRequirement
 from openhands.security import SecurityAnalyzer, options
 from openhands.storage import get_file_store
 from openhands.storage.data_models.user_secrets import UserSecrets
@@ -70,8 +71,16 @@ def create_runtime(
     # agent class
     if agent:
         agent_cls = type(agent)
+        agent_config = agent.config
     else:
         agent_cls = Agent.get_cls(config.default_agent)
+        agent_config = config.get_agent_config(config.default_agent)
+
+    # plugins
+    # remove jupyter plugin if enable_jupyter = false
+    plugins = agent_cls.sandbox_plugins
+    if not agent_config.enable_jupyter:
+        plugins = [plugin for plugin in plugins if not isinstance(plugin, JupyterRequirement)]
 
     # runtime and tools
     runtime_cls = get_runtime_cls(config.runtime)
@@ -80,7 +89,7 @@ def create_runtime(
         config=config,
         event_stream=event_stream,
         sid=session_id,
-        plugins=agent_cls.sandbox_plugins,
+        plugins=plugins,
         headless_mode=headless_mode,
         git_provider_tokens=git_provider_tokens,
     )
