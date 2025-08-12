@@ -415,6 +415,7 @@ class LocalRuntime(ActionExecutionClient):
             raise RuntimeError('Server process died')
 
         try:
+            self.log('debug', f'Trying HTTP GET {self.api_url}/alive')
             response = self.session.get(f'{self.api_url}/alive')
             response.raise_for_status()
             return True
