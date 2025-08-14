@@ -426,7 +426,7 @@ def complete_runtime(
 ) -> dict[str, Any]:
     """Complete the runtime for the agent.
 
-    This function is called before the runtime is used to run the agent.
+    This function is called after the runtime is used to run the agent.
     If you need to do something in the sandbox to get the correctness metric after
     the agent has run, modify this function.
     """
@@ -477,14 +477,14 @@ def complete_runtime(
         f'Failed to cd to /testbed: {str(obs)}',
     )
 
-    action = CmdRunAction(command='git config --global core.pager ""')
+    action = CmdRunAction(command='git config --file=/testbed/.git_config core.pager ""')
     action.set_hard_timeout(600)
     logger.info(action, extra={'msg_type': 'ACTION'})
     obs = runtime.run_action(action)
     logger.info(obs, extra={'msg_type': 'OBSERVATION'})
     assert_and_raise(
         isinstance(obs, CmdOutputObservation) and obs.exit_code == 0,
-        f'Failed to git config --global core.pager "": {str(obs)}',
+        f'Failed to git config --file=/testbed/.git_config core.pager "": {str(obs)}',
     )
 
     # First check for any git repositories in subdirectories
