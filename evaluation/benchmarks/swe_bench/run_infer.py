@@ -101,7 +101,7 @@ def _get_swebench_workspace_dir_name(instance: pd.Series) -> str:
 
 
 def get_instruction(instance: pd.Series, metadata: EvalMetadata) -> MessageAction:
-    workspace_dir_name = _get_swebench_workspace_dir_name(instance)
+    # workspace_dir_name = _get_swebench_workspace_dir_name(instance)
     mode = metadata.details['mode']
     llm_model = metadata.llm_config.model
 
@@ -131,7 +131,7 @@ def get_instruction(instance: pd.Series, metadata: EvalMetadata) -> MessageActio
     # Prepare context for rendering
     context = {
         'instance': instance,
-        'workspace_dir_name': workspace_dir_name,
+        'workspace_dir_name': "/testbed",
         'metadata': metadata,  # Pass metadata if needed in templates
     }
 
@@ -165,7 +165,7 @@ def get_instruction(instance: pd.Series, metadata: EvalMetadata) -> MessageActio
 DEFAULT_DOCKER_IMAGE_PREFIX = os.environ.get(
     'EVAL_DOCKER_IMAGE_PREFIX', 'docker.io/xingyaoww/'
 )
-logger.info(f'Default docker image prefix: {DEFAULT_DOCKER_IMAGE_PREFIX}')
+# logger.info(f'Default docker image prefix: {DEFAULT_DOCKER_IMAGE_PREFIX}')
 
 
 def get_instance_docker_image(
@@ -199,20 +199,20 @@ def get_config(
     metadata: EvalMetadata,
 ) -> OpenHandsConfig:
     # We use a different instance image for the each instance of swe-bench eval
-    use_swebench_official_image = DATASET_TYPE != 'SWE-Gym'
+    # use_swebench_official_image = DATASET_TYPE != 'SWE-Gym'
 
-    base_container_image = get_instance_docker_image(
-        instance['instance_id'],
-        swebench_official_image=use_swebench_official_image,
-    )
-    logger.info(
-        f'Using instance container image: {base_container_image}. '
-        f'Please make sure this image exists. '
-        f'Submit an issue on https://github.com/All-Hands-AI/OpenHands if you run into any issues.'
-    )
+    # base_container_image = get_instance_docker_image(
+    #     instance['instance_id'],
+    #     swebench_official_image=use_swebench_official_image,
+    # )
+    # logger.info(
+    #     f'Using instance container image: {base_container_image}. '
+    #     f'Please make sure this image exists. '
+    #     f'Submit an issue on https://github.com/All-Hands-AI/OpenHands if you run into any issues.'
+    # )
 
     sandbox_config = get_default_sandbox_config_for_eval()
-    sandbox_config.base_container_image = base_container_image
+    # sandbox_config.base_container_image = base_container_image
     sandbox_config.enable_auto_lint = True
     sandbox_config.use_host_network = False
     # Add platform to the sandbox config to solve issue 4401
@@ -227,11 +227,10 @@ def get_config(
         run_as_openhands=False,
         max_iterations=metadata.max_iterations,
         enable_browser=RUN_WITH_BROWSING,
-        runtime=os.environ.get('RUNTIME', 'docker'),
+        runtime="local",
         sandbox=sandbox_config,
-        # do not mount workspace
-        workspace_base=None,
-        workspace_mount_path=None,
+        workspace_base="/testbed",
+        workspace_mount_path_in_sandbox="/testbed",
     )
 
     config.set_llm_config(
@@ -266,12 +265,12 @@ def initialize_runtime(
     logger.info('-' * 30)
     logger.info('BEGIN Runtime Initialization Fn')
     logger.info('-' * 30)
-    workspace_dir_name = _get_swebench_workspace_dir_name(instance)
+    # workspace_dir_name = _get_swebench_workspace_dir_name(instance)
     obs: CmdOutputObservation
 
     # Set instance id and git configuration
     action = CmdRunAction(
-        command=f"""echo 'export SWE_INSTANCE_ID={instance['instance_id']}' >> ~/.bashrc && echo 'export PIP_CACHE_DIR=~/.cache/pip' >> ~/.bashrc && echo "alias git='git --no-pager'" >> ~/.bashrc && git config --global core.pager "" && git config --global diff.binary false"""
+        command=f"""echo 'export SWE_INSTANCE_ID={instance['instance_id']}' >> ~/.bashrc && echo 'export PIP_CACHE_DIR=~/.cache/pip' >> ~/.bashrc && echo "alias git='git --no-pager'" >> ~/.bashrc && git config --file=/testbed/.git_config core.pager "" && git config --file=/testbed/.git_config diff.binary false"""
     )
     action.set_hard_timeout(600)
     logger.info(action, extra={'msg_type': 'ACTION'})
@@ -353,14 +352,14 @@ def initialize_runtime(
         f'Failed to source /swe_util/{entry_script_path}: {str(obs)}',
     )
 
-    action = CmdRunAction(command=f'cd /workspace/{workspace_dir_name}')
+    action = CmdRunAction(command=f'cd /testbed')
     action.set_hard_timeout(600)
     logger.info(action, extra={'msg_type': 'ACTION'})
     obs = runtime.run_action(action)
     logger.info(obs, extra={'msg_type': 'OBSERVATION'})
     assert_and_raise(
         obs.exit_code == 0,
-        f'Failed to cd to /workspace/{workspace_dir_name}: {str(obs)}',
+        f'Failed to cd to /testbed: {str(obs)}',
     )
 
     action = CmdRunAction(command='git reset --hard')
@@ -435,9 +434,9 @@ def complete_runtime(
     logger.info('BEGIN Runtime Completion Fn')
     logger.info('-' * 30)
     obs: CmdOutputObservation
-    workspace_dir_name = _get_swebench_workspace_dir_name(instance)
+    # workspace_dir_name = _get_swebench_workspace_dir_name(instance)
 
-    action = CmdRunAction(command=f'cd /workspace/{workspace_dir_name}')
+    action = CmdRunAction(command=f'cd /testbed')
     action.set_hard_timeout(600)
     logger.info(action, extra={'msg_type': 'ACTION'})
     obs = runtime.run_action(action)
@@ -452,7 +451,7 @@ def complete_runtime(
         logger.info(obs, extra={'msg_type': 'OBSERVATION'})
 
         # Then run the command again
-        action = CmdRunAction(command=f'cd /workspace/{workspace_dir_name}')
+        action = CmdRunAction(command=f'cd /testbed')
         action.set_hard_timeout(600)
         logger.info(action, extra={'msg_type': 'ACTION'})
         obs = runtime.run_action(action)
@@ -467,7 +466,7 @@ def complete_runtime(
         logger.info(obs, extra={'msg_type': 'OBSERVATION'})
 
         # Then run the command again
-        action = CmdRunAction(command=f'cd /workspace/{workspace_dir_name}')
+        action = CmdRunAction(command=f'cd /testbed')
         action.set_hard_timeout(600)
         logger.info(action, extra={'msg_type': 'ACTION'})
         obs = runtime.run_action(action)
@@ -475,7 +474,7 @@ def complete_runtime(
 
     assert_and_raise(
         isinstance(obs, CmdOutputObservation) and obs.exit_code == 0,
-        f'Failed to cd to /workspace/{workspace_dir_name}: {str(obs)}',
+        f'Failed to cd to /testbed: {str(obs)}',
     )
 
     action = CmdRunAction(command='git config --global core.pager ""')
