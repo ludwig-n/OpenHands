@@ -70,6 +70,7 @@ BenchMode = Literal['swe', 'swt', 'swt-ci']
 # Global variable to track dataset type
 DATASET_TYPE = 'SWE-bench'
 
+FILTER_SWE_GYM_INSTANCES = os.environ.get('FILTER_SWE_GYM_INSTANCES', 'false').lower() == 'true'
 
 def set_dataset_type(dataset_name: str) -> str:
     """Set dataset type based on dataset name."""
@@ -770,7 +771,7 @@ if __name__ == '__main__':
     logger.info(
         f'Loaded dataset {args.dataset} with split {args.split}: {len(swe_bench_tests)} tasks'
     )
-    if DATASET_TYPE == 'SWE-Gym':
+    if DATASET_TYPE == 'SWE-Gym' and FILTER_SWE_GYM_INSTANCES:
         with open(
             os.path.join(
                 os.path.dirname(os.path.abspath(__file__)),
