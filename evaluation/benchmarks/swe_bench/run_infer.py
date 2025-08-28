@@ -251,6 +251,7 @@ def get_config(
         enable_mcp=False,
         condenser=metadata.condenser_config,
         enable_prompt_extensions=False,
+        enable_think=False,
     )
     config.set_agent_config(agent_config)
     return config
