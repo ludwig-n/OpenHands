@@ -11,7 +11,7 @@ I've uploaded a python code repository in the directory {{ workspace_dir_name }}
 Can you help me implement the necessary changes to the repository so that the requirements specified in the <issue_description> are met?
 I've already taken care of all changes to any of the test files described in the <issue_description>. This means you DON'T have to modify the testing logic or any of the tests in any way!
 The development environment is unavailable. This means you CANNOT RUN PYTHON for any purpose. Do not write or execute any tests. Do not use Python to check your work in any way. Do not install any packages.
-When you use the execute_bash tool, using the `python` or `python3` command is STRICTLY FORBIDDEN. You cannot use them even with flags like `python -c`, `python -m`, etc. The following commands are also forbidden: `pytest`, `mypy`, `pip`, `pip3`, `apt`, `apt-get`.
+When you use the `execute_bash` tool, using the `python` or `python3` command is STRICTLY FORBIDDEN. You cannot use them even with flags like `python -c`, `python -m`, etc. The following commands are also forbidden: `pytest`, `mypy`, `pip`, `pip3`, `apt`, `apt-get`.
 Your task is to make the minimal changes to non-test files in the /workspace/{{ workspace_dir_name }} directory to ensure the <issue_description> is satisfied.
 
 Follow these phases to resolve the issue:
@@ -42,5 +42,6 @@ Phase 4. FIX IMPLEMENTATION: Edit the source code to implement your chosen solut
    5.1 Ensure you've fully addressed all requirements.
 
 Remember that you MUST NOT write or execute any tests, or use the `python` or `python3` command at all.
+After you've implemented and reviewed your fix, immediately use the `finish` tool to complete the task. Do not attempt to verify any part of your solution with tests.
 
 Be thorough in your exploration and reasoning. It's fine if your thinking process is lengthy - quality and completeness are more important than brevity.
