@@ -7,10 +7,10 @@ _DETAILED_BASH_DESCRIPTION = """Execute a bash command in the terminal within a 
 
 
 ### Command Execution
-* One command at a time: You can only execute one bash command at a time. If you need to run multiple commands sequentially, use `&&` or `;` to chain them together.
+* No Python: Using the `python` or `python3` command is STRICTLY FORBIDDEN. You cannot use them even with flags like `python -c`, `python -m`, etc. The following commands are also forbidden: `pytest`, `mypy`, `pip`, `pip3`, `apt`, `apt-get`.
+* One command at a time: You can only execute one bash command at a time. If you need to run multiple commands sequentially, use `&&` or `;` to chain them together. In this case, NONE of the commands can be `python`, `python3`, `pytest`, `mypy`, `pip`, `pip3`, `apt` or `apt-get`.
 * Persistent session: Commands execute in a persistent shell session where environment variables, virtual environments, and working directory persist between commands.
 * Soft timeout: Commands have a soft timeout of 10 seconds, once that's reached, you have the option to continue or interrupt the command (see section below for details)
-* No Python: You cannot run tests or any other Python code. Do not use any of the following commands: python, pytest, mypy, pip, apt, apt-get. "python -c", "python -m" or any other options for these commands are also not allowed.
 
 ### Long-running Commands
 * For commands that may run indefinitely, run them in the background and redirect output to a file.
@@ -30,11 +30,10 @@ _DETAILED_BASH_DESCRIPTION = """Execute a bash command in the terminal within a 
 """
 
 _SHORT_BASH_DESCRIPTION = """Execute a bash command in the terminal.
+* No Python: Using the `python` or `python3` command is STRICTLY FORBIDDEN. You cannot use them even with flags like `python -c`, `python -m`, etc. The following commands are also forbidden: `pytest`, `mypy`, `pip`, `pip3`, `apt`, `apt-get`.
 * Long running commands: For commands that may run indefinitely, it should be run in the background and the output should be redirected to a file. For commands that need to run for a specific duration, you can set the "timeout" argument to specify a hard timeout in seconds.
 * Interact with running process: If a bash command returns exit code `-1`, this means the process is not yet finished. By setting `is_input` to `true`, the assistant can interact with the running process and send empty `command` to retrieve any additional logs, or send additional text (set `command` to the text) to STDIN of the running process, or send command like `C-c` (Ctrl+C), `C-d` (Ctrl+D), `C-z` (Ctrl+Z) to interrupt the process.
-* One command at a time: You can only execute one bash command at a time. If you need to run multiple commands sequentially, you can use `&&` or `;` to chain them together.
-* No Python: You cannot run tests or any other Python code. Do not use any of the following commands: python, pytest, mypy, pip, apt, apt-get. "python -c", "python -m" or any other options for these commands are also not allowed."""
-
+* One command at a time: You can only execute one bash command at a time. If you need to run multiple commands sequentially, you can use `&&` or `;` to chain them together. In this case, NONE of the commands can be `python`, `python3`, `pytest`, `mypy`, `pip`, `pip3`, `apt` or `apt-get`."""
 
 def create_cmd_run_tool(
     use_short_description: bool = False,
@@ -53,7 +52,7 @@ def create_cmd_run_tool(
                     'command': {
                         'type': 'string',
                         'description': refine_prompt(
-                            'The bash command to execute. Do not use any of the following commands: python, pytest, mypy, pip, apt, apt-get. "python -c", "python -m" or any other options for these commands are also not allowed. Can be empty string to view additional logs when previous exit code is `-1`. Can be `C-c` (Ctrl+C) to interrupt the currently running process. Note: You can only execute one bash command at a time. If you need to run multiple commands sequentially, you can use `&&` or `;` to chain them together.'
+                            'The bash command to execute. Using the `python` or `python3` command is STRICTLY FORBIDDEN. You cannot use them even with flags like `python -c`, `python -m`, etc. The following commands are also forbidden: `pytest`, `mypy`, `pip`, `pip3`, `apt`, `apt-get`. Can be empty string to view additional logs when previous exit code is `-1`. Can be `C-c` (Ctrl+C) to interrupt the currently running process. Note: You can only execute one bash command at a time. If you need to run multiple commands sequentially, you can use `&&` or `;` to chain them together. In this case, NONE of the commands can be `python`, `python3`, `pytest`, `mypy`, `pip`, `pip3`, `apt` or `apt-get`.'
                         ),
                     },
                     'is_input': {
