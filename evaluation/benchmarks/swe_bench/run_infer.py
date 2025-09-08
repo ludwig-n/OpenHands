@@ -771,6 +771,15 @@ if __name__ == '__main__':
     logger.info(
         f'Loaded dataset {args.dataset} with split {args.split}: {len(swe_bench_tests)} tasks'
     )
+
+    # For datasets without executable environments, insert dummy columns that OpenHands expects to be present
+    if "PASS_TO_PASS" not in swe_bench_tests:
+        swe_bench_tests["PASS_TO_PASS"] = "[]"
+    if "FAIL_TO_PASS" not in swe_bench_tests:
+        swe_bench_tests["FAIL_TO_PASS"] = "[]"
+    if "version" not in swe_bench_tests:
+        swe_bench_tests["version"] = "1.0"
+
     if DATASET_TYPE == 'SWE-Gym' and FILTER_SWE_GYM_INSTANCES:
         with open(
             os.path.join(
