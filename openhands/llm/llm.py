@@ -291,12 +291,7 @@ class LLM(RetryMixin, DebugMixin):
             mock_fncall_tools = None
             # if the agent or caller has defined tools, and we mock via prompting, convert the messages
             if mock_function_calling and 'tools' in kwargs:
-                add_in_context_learning_example = True
-                if (
-                    'openhands-lm' in self.config.model
-                    or 'devstral' in self.config.model
-                ):
-                    add_in_context_learning_example = False
+                add_in_context_learning_example = os.environ.get("ADD_IN_CONTEXT_LEARNING_EXAMPLE", "false").lower() == "true"
 
                 messages = convert_fncall_messages_to_non_fncall_messages(
                     messages,
