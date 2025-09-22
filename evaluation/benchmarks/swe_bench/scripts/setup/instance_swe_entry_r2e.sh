@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+source ~/.bashrc
 SWEUTIL_DIR=/swe_util
 
 # FIXME: Cannot read SWE_INSTANCE_ID from the environment variable
@@ -9,8 +10,12 @@ if [ -z "$SWE_INSTANCE_ID" ]; then
     exit 1
 fi
 
+# jq is not installed by default in the r2e environments, so we need to download it first
+curl https://github.com/jqlang/jq/releases/download/jq-1.8.1/jq-linux-amd64 -Lo /root/jq
+chmod +x /root/jq
+
 # Read the swe-bench-test-lite.json file and extract the required item based on instance_id
-item=$(jq --arg INSTANCE_ID "$SWE_INSTANCE_ID" '.[] | select(.instance_id == $INSTANCE_ID)' $SWEUTIL_DIR/eval_data/instances/swe-bench-instance.json)
+item=$(/root/jq --arg INSTANCE_ID "$SWE_INSTANCE_ID" '.[] | select(.instance_id == $INSTANCE_ID)' $SWEUTIL_DIR/eval_data/instances/swe-bench-instance.json)
 
 if [[ -z "$item" ]]; then
   echo "No item found for the provided instance ID."
@@ -18,7 +23,7 @@ if [[ -z "$item" ]]; then
 fi
 
 
-WORKSPACE_NAME=$(echo "$item" | jq -r '(.repo | tostring) + "__" + (.version | tostring) | gsub("/"; "__")')
+WORKSPACE_NAME=$(echo "$item" | /root/jq -r '(.repo | tostring) + "__" + (.version | tostring) | gsub("/"; "__")')
 
 echo "WORKSPACE_NAME: $WORKSPACE_NAME"
 
