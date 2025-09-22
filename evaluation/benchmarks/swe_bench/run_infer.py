@@ -84,6 +84,8 @@ def set_dataset_type(dataset_name: str) -> str:
         DATASET_TYPE = 'SWE-rebench'
     elif 'multimodal' in name_lower:
         DATASET_TYPE = 'Multimodal'
+    elif 'r2e-gym' in name_lower:
+        DATASET_TYPE = 'R2E-Gym'
     else:
         DATASET_TYPE = 'SWE-bench'
 
@@ -324,6 +326,8 @@ def initialize_runtime(
             entry_script_path = 'instance_swe_entry_live.sh'
         elif DATASET_TYPE == 'SWE-rebench':
             entry_script_path = 'instance_swe_entry_rebench.sh'
+        elif DATASET_TYPE == 'R2E-Gym':
+            entry_script_path = 'instance_swe_entry_r2e.sh'
         else:
             entry_script_path = 'instance_swe_entry.sh'
         runtime.copy_to(
