@@ -10,12 +10,15 @@ if [ -z "$SWE_INSTANCE_ID" ]; then
     exit 1
 fi
 
-# jq is not installed by default in the r2e environments, so we need to download it first
-curl https://github.com/jqlang/jq/releases/download/jq-1.8.1/jq-linux-amd64 -Lo /root/jq
-chmod +x /root/jq
+# Install jq if not present (it is not installed by default in the r2e environments)
+if ! command -v jq >/dev/null 2>&1
+then
+    curl https://github.com/jqlang/jq/releases/download/jq-1.8.1/jq-linux-amd64 -Lo /bin/jq
+    chmod +x /bin/jq
+fi
 
 # Read the swe-bench-test-lite.json file and extract the required item based on instance_id
-item=$(/root/jq --arg INSTANCE_ID "$SWE_INSTANCE_ID" '.[] | select(.instance_id == $INSTANCE_ID)' $SWEUTIL_DIR/eval_data/instances/swe-bench-instance.json)
+item=$(jq --arg INSTANCE_ID "$SWE_INSTANCE_ID" '.[] | select(.instance_id == $INSTANCE_ID)' $SWEUTIL_DIR/eval_data/instances/swe-bench-instance.json)
 
 if [[ -z "$item" ]]; then
   echo "No item found for the provided instance ID."
@@ -23,7 +26,7 @@ if [[ -z "$item" ]]; then
 fi
 
 
-WORKSPACE_NAME=$(echo "$item" | /root/jq -r '(.repo | tostring) + "__" + (.version | tostring) | gsub("/"; "__")')
+WORKSPACE_NAME=$(echo "$item" | jq -r '(.repo | tostring) + "__" + (.version | tostring) | gsub("/"; "__")')
 
 echo "WORKSPACE_NAME: $WORKSPACE_NAME"
 
