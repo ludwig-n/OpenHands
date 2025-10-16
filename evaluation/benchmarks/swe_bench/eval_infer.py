@@ -276,7 +276,20 @@ def process_instance(
                     time.sleep(30)  # Wait for 30 seconds before checking again
 
                 # Read the log file
-                cat_action = CmdRunAction(command=f'cat {log_file}')
+
+                # Fork fix: set hidden=True to fix evaluation results.
+                #
+                # Explanation:
+                #
+                # This log file contains test results (which tests passed or failed).
+                # During evaluation, they are used to determine if the issue was resolved or not.
+                #
+                # By default the result of the command (cat_obs.content) gets truncated to 30K characters,
+                # which can cut off some test results and lead to incorrect evaluation results.
+                #
+                # hidden=True disables the truncation (see CmdOutputObservation.__init__).
+
+                cat_action = CmdRunAction(command=f'cat {log_file}', hidden=True)
                 cat_action.set_hard_timeout(300)
                 cat_obs = runtime.run_action(cat_action)
 
@@ -299,11 +312,8 @@ def process_instance(
                             f.write(test_output)
                         try:
                             extra_kwargs = {}
-                            if 'SWE-Gym' in metadata.dataset:
-                                # SWE-Gym uses a different version of the package, hence a different eval report argument
-                                extra_kwargs['log_path'] = test_output_path
-                            else:
-                                extra_kwargs['test_log_path'] = test_output_path
+                            # Fork fix: assume we're always evaluating on SWE-Gym and use log_path arg
+                            extra_kwargs['log_path'] = test_output_path
                             _report = conditional_imports.get_eval_report(
                                 test_spec=test_spec,
                                 prediction={
@@ -370,28 +380,19 @@ if __name__ == '__main__':
     )
     args, _ = parser.parse_known_args()
 
-    if 'SWE-Gym' in args.dataset:
-        from swegym.harness.grading import get_eval_report
-        from swegym.harness.run_evaluation import (
-            APPLY_PATCH_FAIL,
-            APPLY_PATCH_PASS,
-        )
-        from swegym.harness.test_spec import (
-            SWEbenchInstance,
-            make_test_spec,
-        )
-        from swegym.harness.utils import load_swebench_dataset
-    else:  # Newer version of SWE-Bench have different import paths
-        from swebench.harness.grading import get_eval_report
-        from swebench.harness.run_evaluation import (
-            APPLY_PATCH_FAIL,
-            APPLY_PATCH_PASS,
-        )
-        from swebench.harness.test_spec.test_spec import (
-            SWEbenchInstance,
-            make_test_spec,
-        )
-        from swebench.harness.utils import load_swebench_dataset
+    # Fork fix: assume we're always evaluating on SWE-Gym and import everything from their package.
+    # Normally OH checks if the dataset name contains "SWE-Gym", which is annoying if it's a local file.
+
+    from swegym.harness.grading import get_eval_report
+    from swegym.harness.run_evaluation import (
+        APPLY_PATCH_FAIL,
+        APPLY_PATCH_PASS,
+    )
+    from swegym.harness.test_spec import (
+        SWEbenchInstance,
+        make_test_spec,
+    )
+    from swegym.harness.utils import load_swebench_dataset
 
     # Load SWE-Bench dataset
     full_dataset: list[SWEbenchInstance] = load_swebench_dataset(
