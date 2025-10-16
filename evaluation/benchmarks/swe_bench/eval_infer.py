@@ -277,65 +277,55 @@ def process_instance(
 
                 # Read the log file
 
-                # Fork fix: set hidden=True to fix evaluation results.
-                #
-                # Explanation:
-                #
-                # This log file contains test results (which tests passed or failed).
-                # During evaluation, they are used to determine if the issue was resolved or not.
-                #
-                # By default the result of the command (cat_obs.content) gets truncated to 30K characters,
-                # which can cut off some test results and lead to incorrect evaluation results.
-                #
-                # hidden=True disables the truncation (see CmdOutputObservation.__init__).
+                # Fork fix: assume we're running this locally and just read the file directly
+                # instead of doing it through the runtime.
+                # Otherwise there are weird issues with truncation
+                # and Unicode characters in test names not matching with what get_eval_report will expect.
 
-                cat_action = CmdRunAction(command=f'cat {log_file}', hidden=True)
-                cat_action.set_hard_timeout(300)
-                cat_obs = runtime.run_action(cat_action)
+                with open(log_file, "r") as f:
+                    test_output = f.read()
 
                 # Grade answer
-                if isinstance(cat_obs, CmdOutputObservation) and cat_obs.exit_code == 0:
-                    test_output = cat_obs.content
-                    assert isinstance(test_output, str)
-                    instance['test_result']['test_output'] = test_output
 
-                    # Get report from test output
-                    logger.info(f'[{instance_id}] Grading answer...')
-                    with tempfile.TemporaryDirectory() as temp_dir:
-                        # Create a directory structure that matches the expected format
-                        # NOTE: this is a hack to make the eval report format consistent
-                        # with the original SWE-Bench eval script
-                        log_dir = os.path.join(temp_dir, 'logs', instance_id.lower())
-                        os.makedirs(log_dir, exist_ok=True)
-                        test_output_path = os.path.join(log_dir, 'test_output.txt')
-                        with open(test_output_path, 'w') as f:
-                            f.write(test_output)
-                        try:
-                            extra_kwargs = {}
-                            # Fork fix: assume we're always evaluating on SWE-Gym and use log_path arg
-                            extra_kwargs['log_path'] = test_output_path
-                            _report = conditional_imports.get_eval_report(
-                                test_spec=test_spec,
-                                prediction={
-                                    'model_patch': model_patch,
-                                    'instance_id': instance_id,
-                                },
-                                include_tests_status=True,
-                                **extra_kwargs,
-                            )
-                            report = _report[instance_id]
-                            logger.info(
-                                f'[{instance_id}] report: {report}\nResult for {instance_id}: resolved: {report["resolved"]}'
-                            )
-                            instance['test_result']['report']['resolved'] = report[
-                                'resolved'
-                            ]
-                        except Exception as e:
-                            logger.error(
-                                f'[{instance_id}] Error when getting eval report: {e}'
-                            )
-                            instance['test_result']['report']['resolved'] = False
-                            instance['test_result']['report']['error_eval'] = True
+                instance['test_result']['test_output'] = test_output
+
+                # Get report from test output
+                logger.info(f'[{instance_id}] Grading answer...')
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    # Create a directory structure that matches the expected format
+                    # NOTE: this is a hack to make the eval report format consistent
+                    # with the original SWE-Bench eval script
+                    log_dir = os.path.join(temp_dir, 'logs', instance_id.lower())
+                    os.makedirs(log_dir, exist_ok=True)
+                    test_output_path = os.path.join(log_dir, 'test_output.txt')
+                    with open(test_output_path, 'w') as f:
+                        f.write(test_output)
+                    try:
+                        extra_kwargs = {}
+                        # Fork fix: assume we're always evaluating on SWE-Gym and use log_path arg
+                        extra_kwargs['log_path'] = test_output_path
+                        _report = conditional_imports.get_eval_report(
+                            test_spec=test_spec,
+                            prediction={
+                                'model_patch': model_patch,
+                                'instance_id': instance_id,
+                            },
+                            include_tests_status=True,
+                            **extra_kwargs,
+                        )
+                        report = _report[instance_id]
+                        logger.info(
+                            f'[{instance_id}] report: {report}\nResult for {instance_id}: resolved: {report["resolved"]}'
+                        )
+                        instance['test_result']['report']['resolved'] = report[
+                            'resolved'
+                        ]
+                    except Exception as e:
+                        logger.error(
+                            f'[{instance_id}] Error when getting eval report: {e}'
+                        )
+                        instance['test_result']['report']['resolved'] = False
+                        instance['test_result']['report']['error_eval'] = True
             else:
                 logger.info(f'[{instance_id}] Error when starting eval:\n{obs.content}')
                 instance['test_result']['report']['error_eval'] = True
