@@ -46,6 +46,7 @@ from openhands.events.observation import (
     Observation,
 )
 from openhands.integrations.provider import PROVIDER_TOKEN_TYPE
+from openhands.llm.llm_registry import LLMRegistry
 from openhands.runtime.base import Runtime
 from openhands.runtime.plugins import PluginRequirement
 from openhands.runtime.runtime_status import RuntimeStatus
@@ -56,8 +57,8 @@ if TYPE_CHECKING:
 # Import Windows PowerShell support if on Windows
 if sys.platform == 'win32':
     try:
-        from openhands.runtime.utils.windows_bash import WindowsPowershellSession
         from openhands.runtime.utils.windows_exceptions import DotNetMissingError
+        from openhands.runtime.utils.windows_bash import WindowsPowershellSession  # isort: skip
     except (ImportError, DotNetMissingError) as err:
         # Print a user-friendly error message without stack trace
         friendly_message = """
@@ -107,6 +108,7 @@ class CLIRuntime(Runtime):
         self,
         config: OpenHandsConfig,
         event_stream: EventStream,
+        llm_registry: LLMRegistry,
         sid: str = 'default',
         plugins: list[PluginRequirement] | None = None,
         env_vars: dict[str, str] | None = None,
@@ -119,6 +121,7 @@ class CLIRuntime(Runtime):
         super().__init__(
             config,
             event_stream,
+            llm_registry,
             sid,
             plugins,
             env_vars,
