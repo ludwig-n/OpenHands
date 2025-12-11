@@ -38,7 +38,12 @@ if [ -d /workspace/$WORKSPACE_NAME ]; then
     rm -rf /workspace/$WORKSPACE_NAME
 fi
 mkdir -p /workspace
-cp -r /home/$REPO_NAME /workspace/$WORKSPACE_NAME
+
+if [ -d /testbed ]; then
+    cp -r /testbed /workspace/$WORKSPACE_NAME
+else
+    cp -r /home/$REPO_NAME /workspace/$WORKSPACE_NAME
+fi
 
 # Activate instance-specific environment
 # . /opt/miniconda3/etc/profile.d/conda.sh
