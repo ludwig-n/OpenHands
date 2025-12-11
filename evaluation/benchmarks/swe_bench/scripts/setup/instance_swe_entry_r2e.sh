@@ -17,6 +17,20 @@ then
     chmod +x /bin/jq
 fi
 
+# Remove R2E-Gym test-related files.
+for f in / /root /testbed
+do
+    # /r2e_tests contains evaluation tests that the agent should not see.
+    rm -rf $f/r2e_tests
+    # run_tests.sh launches the tests in /r2e_tests, so the agent should not see this either.
+    # We check that it contains the substring "r2e_tests"
+    # to avoid accidentally deleting an unrelated file with that name.
+    if grep -qs r2e_tests $f/run_tests.sh
+    then
+        rm -rf $f/run_tests.sh
+    fi
+done
+
 # Read the swe-bench-test-lite.json file and extract the required item based on instance_id
 item=$(jq --arg INSTANCE_ID "$SWE_INSTANCE_ID" '.[] | select(.instance_id == $INSTANCE_ID)' $SWEUTIL_DIR/eval_data/instances/swe-bench-instance.json)
 
