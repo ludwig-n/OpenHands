@@ -836,6 +836,8 @@ class LLM(RetryMixin, DebugMixin):
                 )
             ):
                 message.force_string_serializer = True
+            if 'devstral-2' in self.config.model.lower() or 'devstral-small-2' in self.config.model.lower():
+                message.force_string_serializer = True
 
         # let pydantic handle the serialization
         return [message.model_dump() for message in messages]
