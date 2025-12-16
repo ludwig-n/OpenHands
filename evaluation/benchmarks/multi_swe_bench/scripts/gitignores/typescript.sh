@@ -1,5 +1,4 @@
 #!/bin/bash
-cd $ROOT
 
 if [ ! -f .gitignore ]; then
     touch .gitignore
