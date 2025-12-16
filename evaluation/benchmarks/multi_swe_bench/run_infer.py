@@ -536,6 +536,17 @@ def initialize_runtime(
     #     f'Expected to find python interpreter from testbed, but got: {str(obs)}',
     # )
 
+    gitignore_script_path = os.path.join(script_dir, f"scripts/gitignores/{LANGUAGE}.sh")
+    if os.path.exists(gitignore_script_path):
+        action = CmdRunAction(command=f"./{gitignore_script_path}")
+        action.set_hard_timeout(600)
+        logger.info(action, extra={'msg_type': 'ACTION'})
+        obs = runtime.run_action(action)
+        logger.info(obs, extra={'msg_type': 'OBSERVATION'})
+        assert_and_raise(obs.exit_code == 0, f'Failed to run gitignore script ({LANGUAGE}.sh): {str(obs)}')
+    else:
+        logger.info(f"No gitignore script found for language '{LANGUAGE}'. Skipping gitignore script.")
+
     logger.info('-' * 30)
     logger.info('END Runtime Initialization Fn')
     logger.info('-' * 30)
