@@ -538,7 +538,7 @@ def initialize_runtime(
 
     gitignore_script_path = os.path.join(script_dir, f"scripts/gitignores/{LANGUAGE}.sh")
     if os.path.exists(gitignore_script_path):
-        action = CmdRunAction(command=f"./{gitignore_script_path}")
+        action = CmdRunAction(command=gitignore_script_path)
         action.set_hard_timeout(600)
         logger.info(action, extra={'msg_type': 'ACTION'})
         obs = runtime.run_action(action)
