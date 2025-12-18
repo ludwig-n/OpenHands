@@ -639,8 +639,9 @@ def complete_runtime(
     n_retries = 0
     git_patch = None
     while n_retries < 5:
+        # Generate patch, ignoring changes to .gitignore
         action = CmdRunAction(
-            command=f'git diff --no-color --cached {instance["base_commit"]} > patch.diff'
+            command=f'git diff --no-color --cached {instance["base_commit"]} \':!.gitignore\' > patch.diff'
         )
         action.set_hard_timeout(max(300 + 100 * n_retries, 600))
         logger.info(action, extra={'msg_type': 'ACTION'})
