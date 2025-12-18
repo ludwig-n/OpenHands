@@ -3,6 +3,8 @@
 if [ ! -f .gitignore ]; then
     touch .gitignore
     echo "Created new .gitignore file"
+else
+    echo >> .gitignore  # append newline to existing gitignore
 fi
 
 declare -a ignores=(
