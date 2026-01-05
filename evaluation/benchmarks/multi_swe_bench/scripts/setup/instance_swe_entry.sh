@@ -39,6 +39,9 @@ if [ -d /workspace/$WORKSPACE_NAME ]; then
 fi
 mkdir -p /workspace
 
+# Handle two possible repo locations:
+# 1. /testbed - for SWE-bench Multilingual and most SWE-bench-style datasets.
+# 2. /home/$REPO_NAME - for Multi-SWE-bench.
 if [ -d /testbed ]; then
     cp -r /testbed /workspace/$WORKSPACE_NAME
 else

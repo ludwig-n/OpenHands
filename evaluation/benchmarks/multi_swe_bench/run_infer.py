@@ -646,6 +646,10 @@ def complete_runtime(
         f'Failed to git config --global core.pager "": {str(obs)}',
     )
 
+    # Run gitignore script for the given language, if present.
+    # This adds paths of compilation artifacts to .gitignore, so that they do not appear in the final patch file.
+    # The scripts were copied from MSWE-agent with minor fixes:
+    # https://github.com/multi-swe-bench/MSWE-agent/tree/main/multi_swe_bench/utils/gitignores
     gitignore_script_path = os.path.join(os.path.dirname(__file__), f"scripts/gitignores/{LANGUAGE}.sh")
     if os.path.exists(gitignore_script_path):
         action = CmdRunAction(command=gitignore_script_path)
