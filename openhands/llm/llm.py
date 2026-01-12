@@ -234,6 +234,10 @@ class LLM(RetryMixin, DebugMixin):
         elif 'gemini' in self.config.model.lower() and self.config.safety_settings:
             kwargs['safety_settings'] = self.config.safety_settings
 
+        # Add completion_kwargs if present
+        if self.config.completion_kwargs is not None:
+            kwargs.update(self.config.completion_kwargs)
+
         self._completion = partial(
             litellm_completion,
             model=self.config.model,
