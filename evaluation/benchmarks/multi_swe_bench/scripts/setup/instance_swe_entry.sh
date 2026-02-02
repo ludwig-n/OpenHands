@@ -27,24 +27,19 @@ WORKSPACE_NAME=$(echo "$item" | jq -r '(.repo | tostring) + "__" + (.version | t
 
 echo "WORKSPACE_NAME: $WORKSPACE_NAME"
 
-# Clear the workspace
-if [ -d /workspace ]; then
-    rm -rf /workspace/*
-else
-    mkdir /workspace
-fi
-# Copy repo to workspace
+# Clear the workspace if it exists
 if [ -d /workspace/$WORKSPACE_NAME ]; then
     rm -rf /workspace/$WORKSPACE_NAME
 fi
 mkdir -p /workspace
 
-# Handle two possible repo locations:
+# Handle three possible repo locations:
 # 1. /testbed - for SWE-bench Multilingual and most SWE-bench-style datasets.
 # 2. /home/$REPO_NAME - for Multi-SWE-bench.
+# 3. /workspace/repo (in this case don't copy it, work directly inside of it instead)
 if [ -d /testbed ]; then
     cp -r /testbed /workspace/$WORKSPACE_NAME
-else
+elif [ -d /home/$REPO_NAME ]; then
     cp -r /home/$REPO_NAME /workspace/$WORKSPACE_NAME
 fi
 

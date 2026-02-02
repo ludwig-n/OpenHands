@@ -1,6 +1,7 @@
 import asyncio
 import json
 import os
+import pathlib
 import tempfile
 from typing import Any
 
@@ -61,7 +62,10 @@ AGENT_CLS_TO_FAKE_USER_RESPONSE_FN = {
 
 
 def _get_swebench_workspace_dir_name(instance: pd.Series) -> str:
-    return f'{instance.repo}__{instance.version}'.replace('/', '__')
+    if pathlib.Path("/workspace/repo").exists():
+        return "repo"
+    else:
+        return f'{instance.repo}__{instance.version}'.replace('/', '__')
 
 
 def get_instruction(instance: pd.Series, metadata: EvalMetadata):
