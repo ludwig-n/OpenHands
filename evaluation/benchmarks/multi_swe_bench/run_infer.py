@@ -567,6 +567,23 @@ def initialize_runtime(
         f'Failed to cd to /workspace/{workspace_dir_name}: {str(obs)}',
     )
 
+    # If a git repository is not present, initialize one
+    if not pathlib.Path(f"/workspace/{workspace_dir_name}/.git").exists():
+        action = CmdRunAction(command='git init && git add -A && git commit -m "Initial commit" && git rev-parse HEAD')
+        action.set_hard_timeout(600)
+        logger.info(action, extra={'msg_type': 'ACTION'})
+        obs = runtime.run_action(action)
+        logger.info(obs, extra={'msg_type': 'OBSERVATION'})
+        assert_and_raise(
+            obs.exit_code == 0,
+            f'Failed to initialize git repo: {str(obs)}',
+        )
+
+        # The last command (git rev-parse HEAD) will print the initial commit SHA. Set it as base_commit
+        base_commit = obs.content.split()[-1]
+        instance["base_commit"] = base_commit
+        logger.info(f"Git repository initialized in folder /workspace/{workspace_dir_name}. Base commit: {base_commit}")
+
     action = CmdRunAction(command='git reset --hard')
     action.set_hard_timeout(600)
     logger.info(action, extra={'msg_type': 'ACTION'})
