@@ -525,9 +525,13 @@ def initialize_runtime(
         f'Failed to cd to /workspace/{workspace_dir_name}: {str(obs)}',
     )
 
-    # If a git repository is not present, initialize one
-    if not pathlib.Path(f"/workspace/{workspace_dir_name}/.git").exists():
-        action = CmdRunAction(command='git init && git add -A && git commit -m "Initial commit" && git rev-parse HEAD')
+    # If the base commit is not available:
+    # - If there is no git repository, initialize a new one, make an initial commit and get its SHA.
+    # - If the repo is already initialized, `git init` will be a no-op. Simply create a new commit and get its SHA.
+    if not instance.get("base_commit"):
+        action = CmdRunAction(
+            command='git init && git add -A && git commit --allow-empty -m "Base commit" && git rev-parse HEAD'
+        )
         action.set_hard_timeout(600)
         logger.info(action, extra={'msg_type': 'ACTION'})
         obs = runtime.run_action(action)
@@ -537,10 +541,13 @@ def initialize_runtime(
             f'Failed to initialize git repo: {str(obs)}',
         )
 
-        # The last command (git rev-parse HEAD) will print the initial commit SHA. Set it as base_commit
+        # The last command (git rev-parse HEAD) will print the SHA of the new commit. Set it as base_commit
         base_commit = obs.content.split()[-1]
         instance["base_commit"] = base_commit
-        logger.info(f"Git repository initialized in folder /workspace/{workspace_dir_name}. Base commit: {base_commit}")
+        logger.info(
+            f"Base commit unavailable. Created a new commit {base_commit} "
+            f"containing the current repository state and set it as base_commit."
+        )
 
     action = CmdRunAction(command='git reset --hard')
     action.set_hard_timeout(600)
