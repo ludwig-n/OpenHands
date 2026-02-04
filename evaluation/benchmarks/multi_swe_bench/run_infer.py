@@ -366,57 +366,12 @@ def get_instruction(instance: pd.Series, metadata: EvalMetadata):
     return instruction
 
 
-# TODO: 适应所有的语言
-# def get_instance_docker_image(instance_id: str) -> str:
-#     image_name = 'sweb.eval.x86_64.' + instance_id
-#     if LANGUAGE == 'python':
-#         image_name = image_name.replace(
-#             '__', '_s_'
-#         )  # to comply with docker image naming convention
-#         return (DOCKER_IMAGE_PREFIX.rstrip('/') + '/' + image_name).lower()
-#     else:
-#         return image_name.lower() ##加载本地的
-def get_instance_docker_image(instance: pd.Series):
-    if LANGUAGE == 'python':
-        image_name = 'sweb.eval.x86_64.' + instance['instance_id']
-        image_name = image_name.replace(
-            '__', '_s_'
-        )  # to comply with docker image naming convention
-        return (DOCKER_IMAGE_PREFIX.rstrip('/') + '/' + image_name).lower()
-    else:
-        container_name = instance.get('repo', '').lower()
-        container_name = container_name.replace('/', '_m_')
-        instance_id = instance.get('instance_id', '')
-        tag_suffix = instance_id.split('-')[-1] if instance_id else ''
-        container_tag = f'pr-{tag_suffix}'
-        # pdb.set_trace()
-        return f'mswebench/{container_name}:{container_tag}'
-        # return "kong/insomnia:pr-8284"
-        # return "'sweb.eval.x86_64.local_insomnia"
-        # return "local_insomnia_why"
-        # return "local/kong-insomnia:pr-8117"
-
-
 def get_config(
     instance: pd.Series,
     metadata: EvalMetadata,
 ) -> OpenHandsConfig:
-    SWE_BENCH_CONTAINER_IMAGE = 'ghcr.io/opendevin/eval-swe-bench:full-v1.2.1'
-    if USE_INSTANCE_IMAGE:
-        # We use a different instance image for the each instance of swe-bench eval
-        # base_container_image = get_instance_docker_image(instance['instance_id'])
-        base_container_image = get_instance_docker_image(instance)
-        logger.info(
-            f'Using instance container image: {base_container_image}. '
-            f'Please make sure this image exists. '
-            f'Submit an issue on https://github.com/All-Hands-AI/OpenHands if you run into any issues.'
-        )
-    else:
-        base_container_image = SWE_BENCH_CONTAINER_IMAGE
-        logger.info(f'Using swe-bench container image: {base_container_image}')
-
     sandbox_config = get_default_sandbox_config_for_eval()
-    sandbox_config.base_container_image = base_container_image
+    sandbox_config.base_container_image = None  # not used since we're running locally
     sandbox_config.enable_auto_lint = True
     sandbox_config.use_host_network = False
     # Add platform to the sandbox config to solve issue 4401
@@ -467,7 +422,10 @@ def initialize_runtime(
     workspace_dir_name = _get_swebench_workspace_dir_name(instance)
     obs: CmdOutputObservation
 
-    REPO_NAME = instance['repo'].split('/')[-1]
+    if instance.get("repo"):
+        REPO_NAME = instance['repo'].split('/')[-1]
+    else:
+        REPO_NAME = instance['instance_id'].rsplit('-', maxsplit=1)[0]
     # Set instance id
     action = CmdRunAction(
         command=f"""echo 'export SWE_INSTANCE_ID={instance['instance_id']}' >> ~/.bashrc && echo 'export PIP_CACHE_DIR=~/.cache/pip' >> ~/.bashrc && echo "alias git='git --no-pager'" >> ~/.bashrc && echo 'export REPO_NAME={REPO_NAME}' >> ~/.bashrc"""
