@@ -933,6 +933,11 @@ if __name__ == '__main__':
     # if LANGUAGE == "java": ##TODO:适配多语言的版本
     #     for col in ['issue_numbers', 'created_at']:
     #         instances[col] = instances[col].apply(lambda x: str(x))
+
+    # Insert dummy version for datasets that don't have it
+    if "version" not in instances:
+        instances["version"] = "1.0"
+
     run_evaluation(
         instances,
         metadata,
