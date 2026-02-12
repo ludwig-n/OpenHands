@@ -925,7 +925,7 @@ if __name__ == '__main__':
     print(f'### OUTPUT FILE: {output_file} ###')
     instances = prepare_dataset(swe_bench_tests, output_file, args.eval_n_limit)
 
-    if len(instances) > 0 and not isinstance(
+    if len(instances) > 0 and 'FAIL_TO_PASS' in instances and not isinstance(
         instances['FAIL_TO_PASS'][instances['FAIL_TO_PASS'].index[0]], str
     ):
         for col in ['PASS_TO_PASS', 'FAIL_TO_PASS']:
