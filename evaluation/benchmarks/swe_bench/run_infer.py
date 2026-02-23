@@ -408,19 +408,6 @@ def initialize_runtime(
             obs = runtime.run_action(action)
             logger.info(obs, extra={'msg_type': 'OBSERVATION'})
 
-    if DATASET_TYPE != 'Multimodal' and DATASET_TYPE != 'SWE-bench-Live':
-        # Only for non-multimodal datasets, we need to activate the testbed environment for Python
-        # SWE-Bench multimodal datasets and SWE-bench-Live are not using the testbed environment
-        action = CmdRunAction(command='which python')
-        action.set_hard_timeout(600)
-        logger.info(action, extra={'msg_type': 'ACTION'})
-        obs = runtime.run_action(action)
-        logger.info(obs, extra={'msg_type': 'OBSERVATION'})
-        assert_and_raise(
-            obs.exit_code == 0 and 'testbed' in obs.content,
-            f'Expected to find python interpreter from testbed, but got: {str(obs)}',
-        )
-
     logger.info('-' * 30)
     logger.info('END Runtime Initialization Fn')
     logger.info('-' * 30)
