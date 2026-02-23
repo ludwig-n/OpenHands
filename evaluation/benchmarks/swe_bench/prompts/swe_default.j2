@@ -2,7 +2,7 @@
 /workspace/{{ workspace_dir_name }}
 </uploaded_files>
 
-I've uploaded a python code repository in the directory {{ workspace_dir_name }}. Consider the following issue description:
+I've uploaded a {{ instance.language }} code repository in the directory {{ workspace_dir_name }}. Consider the following issue description:
 
 <issue_description>
 {{ instance.problem_statement }}
@@ -10,8 +10,14 @@ I've uploaded a python code repository in the directory {{ workspace_dir_name }}
 
 Can you help me implement the necessary changes to the repository so that the requirements specified in the <issue_description> are met?
 I've already taken care of all changes to any of the test files described in the <issue_description>. This means you DON'T have to modify the testing logic or any of the tests in any way!
-The development environment is unavailable. This means you CANNOT RUN PYTHON CODE for any purpose. Do not write or execute any tests. Do not use Python to check your work in any way. Do not install any packages.
-When you use the execute_bash tool, you must not use any of these commands: python, pytest, mypy, pip, apt, apt-get. "python -c", "python -m" or any other options for these commands are also not allowed.
+The development environment is unavailable. This means you CANNOT COMPILE OR RUN CODE for any purpose. Do not write, compile or execute any tests. Do not use code execution to check your work in any way. Do not install any packages.
+When you use the execute_bash tool, ONLY the following commands are available to you:
+
+<allowed_commands>
+cd, grep, head, find, rm, git, ls, tail, echo, cat, xargs, pwd, mkdir, which, timeout, sed, wc, C-c, mv, chmod, export, cp, true, pkill, sleep, sort, awk, od, ps, printf, xxd, touch, netstat, lsof, diff, kill, ss, curl, hexdump, tr, file, fuser, nohup, sudo, uniq, sha256sum, basename, cut, tar, wget, man
+</allowed_commands>
+
+Any time you want to run one or more bash commands, check that all commands you plan on running are in the <allowed_commands> list. If any command is not on the list, you MUST NOT RUN IT.
 Your task is to make the minimal changes to non-test files in the /workspace/{{ workspace_dir_name }} directory to ensure the <issue_description> is satisfied.
 
 Follow these phases to resolve the issue:
@@ -41,6 +47,6 @@ Phase 4. FIX IMPLEMENTATION: Edit the source code to implement your chosen solut
 5. FINAL REVIEW: Carefully re-read the problem description and compare your changes with the base commit {{ instance.base_commit }}.
    5.1 Ensure you've fully addressed all requirements.
 
-Remember that you MUST NOT write or execute any tests, or run Python code at all.
+Remember that you MUST NOT write, compile or execute any tests, or compile or run code at all.
 
 Be thorough in your exploration and reasoning. It's fine if your thinking process is lengthy - quality and completeness are more important than brevity.
