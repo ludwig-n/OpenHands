@@ -208,13 +208,25 @@ class BashSession:
 
         logger.debug(f'Initializing bash session with command: {window_command}')
         session_name = f'openhands-{self.username}-{uuid.uuid4()}'
-        self.session = self.server.new_session(
-            session_name=session_name,
-            start_directory=self.work_dir,  # This parameter is supported by libtmux
-            kill_session=True,
-            x=1000,
-            y=1000,
-        )
+
+        for attempt in range(3):
+            try:
+                self.session = self.server.new_session(
+                    session_name=session_name,
+                    start_directory=self.work_dir,  # This parameter is supported by libtmux
+                    kill_session=True,
+                    x=1000,
+                    y=1000,
+                )
+                break
+            except libtmux.exc.TmuxObjectDoesNotExist:
+                if attempt == 2:
+                    raise
+                logger.warning(
+                    f'Got TmuxObjectDoesNotExist error when creating session. '
+                    f'Retrying in 30 seconds (attempt {attempt + 1} of 3)'
+                )
+                time.sleep(30)
 
         # Set history limit to a large number to avoid losing history
         # https://unix.stackexchange.com/questions/43414/unlimited-history-in-tmux
