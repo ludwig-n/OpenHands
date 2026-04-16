@@ -578,6 +578,19 @@ def initialize_runtime(
     obs = runtime.run_action(action)
     logger.info(obs, extra={'msg_type': 'OBSERVATION'})
     assert_and_raise(obs.exit_code == 0, f'Failed to remove git remotes: {str(obs)}')
+
+    # If the current environment is the OpenHands environment, force the agent to use the system python instead.
+    # This is because we never want to run the agent in the OH environment,
+    # but we do want to use the system python for some containers (e.g. swe-rebench-v2).
+    action = CmdRunAction(
+        command='if which python | grep -q OpenHands/.venv; then export PATH="/usr/bin:$PATH" && hash -r; fi'
+    )
+    action.set_hard_timeout(600)
+    logger.info(action, extra={'msg_type': 'ACTION'})
+    obs = runtime.run_action(action)
+    logger.info(obs, extra={'msg_type': 'OBSERVATION'})
+    assert_and_raise(obs.exit_code == 0, f'Failed to force system python: {str(obs)}')
+
     ##TODO:这里看看需不需要判断其他语言的环境
     # action = CmdRunAction(command='which python')
     # action.set_hard_timeout(600)
