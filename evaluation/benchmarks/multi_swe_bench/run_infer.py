@@ -578,6 +578,37 @@ def initialize_runtime(
     obs = runtime.run_action(action)
     logger.info(obs, extra={'msg_type': 'OBSERVATION'})
     assert_and_raise(obs.exit_code == 0, f'Failed to remove git remotes: {str(obs)}')
+
+    # Remove OpenHands venv folders from PATH.
+    # This is because we never want the agent to use the OpenHands venv,
+    # but it can shadow the python we do want to use (e.g. system python for swe-rebench-v2 containers).
+
+    action = CmdRunAction(command='echo $PATH')
+    action.set_hard_timeout(600)
+    logger.info(action, extra={'msg_type': 'ACTION'})
+    obs = runtime.run_action(action)
+    logger.info(obs, extra={'msg_type': 'OBSERVATION'})
+    assert_and_raise(obs.exit_code == 0, f'Failed to echo $PATH: {str(obs)}')
+
+    old_path = obs.content.strip()
+    path_dirs = old_path.split(":")
+    path_dirs = [dir for dir in path_dirs if "OpenHands/.venv" not in dir]
+    new_path = ":".join(path_dirs)
+
+    if new_path != old_path:
+        action = CmdRunAction(command=f'export PATH={new_path} && hash -r')
+        action.set_hard_timeout(600)
+        logger.info(action, extra={'msg_type': 'ACTION'})
+        obs = runtime.run_action(action)
+        logger.info(obs, extra={'msg_type': 'OBSERVATION'})
+        assert_and_raise(obs.exit_code == 0, f'Failed to export PATH: {str(obs)}')
+
+        logger.info("Removed OpenHands venv from PATH:")
+        logger.info(f"  Old PATH: {old_path}")
+        logger.info(f"  New PATH: {new_path}")
+    else:
+        logger.info("OpenHands venv not found in PATH. PATH is unchanged.")
+
     ##TODO:这里看看需不需要判断其他语言的环境
     # action = CmdRunAction(command='which python')
     # action.set_hard_timeout(600)
