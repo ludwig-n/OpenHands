@@ -66,6 +66,8 @@ class Message(BaseModel):
     name: str | None = None  # name of the tool
     # force string serializer
     force_string_serializer: bool = False
+    # reasoning content from the LLM response
+    reasoning_content: str | None = None
 
     @property
     def contains_image(self) -> bool:
@@ -90,6 +92,9 @@ class Message(BaseModel):
             item.text for item in self.content if isinstance(item, TextContent)
         )
         message_dict: dict[str, Any] = {'content': content, 'role': self.role}
+
+        if self.reasoning_content is not None:
+            message_dict['reasoning_content'] = self.reasoning_content
 
         # add tool call keys if we have a tool call or response
         return self._add_tool_call_keys(message_dict)
@@ -121,6 +126,9 @@ class Message(BaseModel):
                 content.extend([d] if isinstance(d, dict) else d)
 
         message_dict: dict[str, Any] = {'content': content, 'role': self.role}
+
+        if self.reasoning_content is not None:
+            message_dict['reasoning_content'] = self.reasoning_content
 
         if role_tool_with_prompt_caching:
             message_dict['cache_control'] = {'type': 'ephemeral'}
