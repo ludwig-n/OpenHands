@@ -725,7 +725,7 @@ def complete_runtime(
     action = CmdRunAction(
         command="""
         for file in $(git status --porcelain | grep -E "^(M| M|\\?\\?|A| A)" | cut -c4-); do
-            if [ -f "$file" ] && (file "$file" | grep -q "executable" || git check-attr binary "$file" | grep -q "binary: set"); then
+            if [ -f "$file" ] && (git check-attr binary "$file" | grep -q "binary: set"); then
                 git rm -f "$file" 2>/dev/null || rm -f "$file"
                 echo "Removed: $file"
             fi
