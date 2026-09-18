@@ -53,7 +53,7 @@ def create_cmd_run_tool(
                     'command': {
                         'type': 'string',
                         'description': refine_prompt(
-                            'The bash command to execute. MUST BE ONE OF THE FOLLOWING: <allowed_commands> cd, grep, head, find, rm, git, ls, tail, echo, cat, xargs, pwd, mkdir, which, timeout, sed, wc, C-c, mv, chmod, export, cp, true, sort, awk, od, printf, xxd, touch, diff, curl, hexdump, tr, file, sudo, uniq, basename, cut, sha256sum, man, tar, wget </allowed_commands>. Can be empty string to view additional logs when previous exit code is `-1`. Can be `C-c` (Ctrl+C) to interrupt the currently running process. Note: You can only execute one bash command at a time. If you need to run multiple commands sequentially, you can use `&&` or `;` to chain them together. In this case, make sure that EACH of these commands is on the <allowed_commands> list.'
+                            'The bash command to execute. MUST BE ONE OF THE FOLLOWING: <allowed_commands> cd, grep, head, find, rm, git, ls, tail, echo, cat, xargs, pwd, mkdir, which, timeout, sed, wc, C-c, mv, chmod, export, cp, true, sort, awk, od, printf, xxd, touch, diff, hexdump, tr, file, sudo, uniq, basename, cut, sha256sum, man, tar </allowed_commands>. Can be empty string to view additional logs when previous exit code is `-1`. Can be `C-c` (Ctrl+C) to interrupt the currently running process. Note: You can only execute one bash command at a time. If you need to run multiple commands sequentially, you can use `&&` or `;` to chain them together. In this case, make sure that EACH of these commands is on the <allowed_commands> list.'
                         ),
                     },
                     'is_input': {
