@@ -10,11 +10,10 @@
     "ruby": "Ruby",
     "rust": "Rust",
     "typescript": "Typescript",
+    "unknown": "",
   }
 -%}
-{%- set language_name = language_names.get(language, "") -%}
-{#- The Python prompt uses a lowercase language name in the first sentence only -#}
-{%- set repo_language_name = "python" if language == "python" else language_name -%}
+{%- set language_name = language_names.get(language, language) -%}
 {%-
   set repr_instructions = {
     "c": "Create a script to reproduce the error by compiling your C code (for example, using `gcc <filename.c> -o <executable>`) and then running the executable using the BashTool, to confirm the error.",
@@ -33,7 +32,7 @@
 <uploaded_files>
 /workspace/{{ workspace_dir_name }}
 </uploaded_files>
-I've uploaded a {% if repo_language_name %}{{ repo_language_name }} {% endif %}code repository in the directory {{ workspace_dir_name }}. Consider the following issue description:
+I've uploaded a {% if language_name %}{{ language_name }} {% endif %}code repository in the directory {{ workspace_dir_name }}. Consider the following issue description:
 
 <issue_description>
 {{ instance.problem_statement }}

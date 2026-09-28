@@ -47,12 +47,12 @@ if [ -z "$DATASET" ]; then
 fi
 
 if [ -z "$LANGUAGE" ]; then
-  echo "LANUGUAGE not specified, use default python"
-  LANGUAGE="python"
+  echo "LANGUAGE not specified, use default empty string"
+  LANGUAGE=""
 fi
 
 if [ -z "$SPLIT" ]; then
-  echo "LANUGUAGE not specified, use default python"
+  echo "SPLIT not specified, use default train"
   SPLIT="train"
 fi
 

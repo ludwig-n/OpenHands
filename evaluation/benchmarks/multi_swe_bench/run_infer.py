@@ -52,7 +52,7 @@ RUN_WITH_BROWSING = os.environ.get('RUN_WITH_BROWSING', 'false').lower() == 'tru
 # TODO: migrate all swe-bench docker to ghcr.io/openhands
 # TODO: 适应所有的语言
 DOCKER_IMAGE_PREFIX = os.environ.get('EVAL_DOCKER_IMAGE_PREFIX', '')
-LANGUAGE = os.environ.get('LANGUAGE', 'python')
+LANGUAGE = os.environ.get('LANGUAGE', '')
 logger.info(f'Using docker image prefix: {DOCKER_IMAGE_PREFIX}')
 
 
