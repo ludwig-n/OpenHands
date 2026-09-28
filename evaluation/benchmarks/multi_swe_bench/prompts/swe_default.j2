@@ -1,0 +1,57 @@
+{%-
+  set language_names = {
+    "c": "C",
+    "cpp": "C++",
+    "go": "Go",
+    "java": "Java",
+    "javascript": "Javascript",
+    "php": "PHP",
+    "python": "Python",
+    "ruby": "Ruby",
+    "rust": "Rust",
+    "typescript": "Typescript",
+  }
+-%}
+{%- set language_name = language_names.get(language, "") -%}
+{#- The Python prompt uses a lowercase language name in the first sentence only -#}
+{%- set repo_language_name = "python" if language == "python" else language_name -%}
+{%-
+  set repr_instructions = {
+    "c": "Create a script to reproduce the error by compiling your C code (for example, using `gcc <filename.c> -o <executable>`) and then running the executable using the BashTool, to confirm the error.",
+    "cpp": "Create or adapt a small executable (e.g., a main file or a test driver) to reproduce the issue. Build and run it (for example, by using `g++ -o reproduce reproduce.cpp && ./reproduce` via the BashTool) to confirm the error.",
+    "go": "Create a script or a function to reproduce the error and execute it with `go run <filename.go>` using the BashTool, to confirm the error.",
+    "java": "Create a Java class to reproduce the error and execute it by first compiling with `javac <classname>.java` and then running with `java <classname>` using the BashTool, to confirm the error",
+    "javascript": "Create a script to reproduce the error and execute it with `node <filename.js>` using the BashTool, to confirm the error.",
+    "php": "Create a script to reproduce the error and execute it with `php <filename.php>` using the BashTool, to confirm the error.",
+    "python": "Create a script to reproduce the error and execute it with `python <filename.py>` using the BashTool, to confirm the error.",
+    "ruby": "Create a script to reproduce the error and execute it with `ruby <filename.rb>` using the BashTool, to confirm the error.",
+    "rust": "Create a reproduction script (or binary) that triggers the error and execute it with `cargo run --bin <filename>` using the BashTool, to confirm the error.",
+    "typescript": "Create a script to reproduce the error and execute it with `ts-node <filename.ts>` using the BashTool, to confirm the error.",
+  }
+-%}
+{%- set repr_instruction = repr_instructions.get(language, "Create a script to reproduce the error and execute it using the BashTool, to confirm the error.") -%}
+<uploaded_files>
+/workspace/{{ workspace_dir_name }}
+</uploaded_files>
+I've uploaded a {% if repo_language_name %}{{ repo_language_name }} {% endif %}code repository in the directory {{ workspace_dir_name }}. Consider the following issue description:
+
+<issue_description>
+{{ instance.problem_statement }}
+</issue_description>
+
+Can you help me implement the necessary changes to the repository so that the requirements specified in the <issue_description> are met?
+I've already taken care of all changes to any of the test files described in the <issue_description>. This means you DON'T have to modify the testing logic or any of the tests in any way!
+Also the development {% if language_name %}{{ language_name }} {% endif %}environment is already set up for you (i.e., all dependencies already installed), so you don't need to install other packages.
+Your task is to make the minimal changes to non-test files in the /workspace directory to ensure the <issue_description> is satisfied.
+Follow these steps to resolve the issue:
+1. As a first step, it might be a good idea to explore the repo to familiarize yourself with its structure.
+2. {{ repr_instruction }}
+3. Edit the sourcecode of the repo to resolve the issue.
+4. Rerun your reproduce script{% if language == "java" %} or class{% endif %} and confirm that the error is fixed!
+5. Think about edgecases, add comprehensive tests for them in your reproduce {% if language == "java" %}class or script, and run them to make sure your fix handles these cases{% else %}script, and run them to make sure your fix handles them{% endif %} as well.
+6. Once you are done with the initial implementation, please carefully re-read the problem description and check the difference between the current code and the base commit {{ instance.base_commit }}. Do you think that the issue has been completely and comprehensively solved? Write tests to check the correctness of the solution, specifically focusing on tests that may point out any remaining problems that are not yet solved. Run all of the tests in the repo and check if any of them fail, and if they do fix the code. Repeat this process of carefully reading the problem description and current implementation, testing, and fixing any problems until you are confident that the current implementation is correct. Find and run any tests in the repo that are related to:
+   - The issue you are fixing
+   - The files you modified
+   - The functions{% if language == "java" %} or classes{% endif %} you changed
+   Make sure all these tests pass with your changes.
+Your thinking should be thorough and so it's fine if it's very long.
